@@ -171,6 +171,10 @@ void mp_init(void) {
     MP_STATE_VM(bluetooth) = MP_OBJ_NULL;
     #endif
 
+    #if MICROPY_HW_ENABLE_USB_RUNTIME_DEVICE
+    MP_STATE_VM(usbd) = MP_OBJ_NULL;
+    #endif
+
     #if MICROPY_PY_THREAD_GIL
     mp_thread_mutex_init(&MP_STATE_VM(gil_mutex));
     #endif
@@ -1149,6 +1153,10 @@ void mp_convert_member_lookup(mp_obj_t self, const mp_obj_type_t *type, mp_obj_t
             // base type (which is what is passed in the `type` argument to this function).
             if (self != MP_OBJ_NULL) {
                 type = mp_obj_get_type(self);
+                if (type == &mp_type_type) {
+                    // `self` is already a type, so use `self` directly.
+                    type = MP_OBJ_TO_PTR(self);
+                }
             }
             dest[0] = ((mp_obj_static_class_method_t *)MP_OBJ_TO_PTR(member))->fun;
             dest[1] = MP_OBJ_FROM_PTR(type);

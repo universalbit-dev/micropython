@@ -29,6 +29,7 @@
 // This file is never compiled standalone, it's included directly from
 // extmod/machine_uart.c via MICROPY_PY_MACHINE_UART_INCLUDEFILE.
 
+#include <string.h>
 #include "py/mperrno.h"
 #include "py/mphal.h"
 #include "py/ringbuf.h"
@@ -88,8 +89,8 @@ typedef struct _machine_uart_buf_t {
 #endif
 
 typedef struct _machine_uart_obj_t {
-    mp_obj_base_t       base;
-    const nrfx_uart_t * p_uart;      // Driver instance
+    mp_obj_base_t base;
+    const nrfx_uart_t *p_uart;       // Driver instance
     machine_uart_buf_t buf;
     uint16_t timeout;       // timeout waiting for first char (in ms)
     uint16_t timeout_char;  // timeout waiting between chars (in ms)
@@ -206,19 +207,17 @@ static mp_obj_t mp_machine_uart_make_new(const mp_obj_type_t *type, size_t n_arg
     nrfx_uart_config_t config;
 
     // flow control
-#if MICROPY_HW_UART1_HWFC
+    #if MICROPY_HW_UART1_HWFC
     config.hal_cfg.hwfc = NRF_UART_HWFC_ENABLED;
-#else
+    #else
     config.hal_cfg.hwfc = NRF_UART_HWFC_DISABLED;
-#endif
+    #endif
 
     config.hal_cfg.parity = NRF_UART_PARITY_EXCLUDED;
 
-#if (BLUETOOTH_SD == 100)
-    config.interrupt_priority = 3;
-#else
-    config.interrupt_priority = 6;
-#endif
+    // Higher priority than pin interrupts, otherwise printing exceptions from
+    // interrupt handlers gets stuck.
+    config.interrupt_priority = NRFX_GPIOTE_DEFAULT_CONFIG_IRQ_PRIORITY - 1;
 
     // These baudrates are not supported, it seems.
     if (args[ARG_baudrate].u_int < 1200 || args[ARG_baudrate].u_int > 1000000) {
@@ -239,10 +238,10 @@ static mp_obj_t mp_machine_uart_make_new(const mp_obj_type_t *type, size_t n_arg
     config.pseltxd = MICROPY_HW_UART1_TX;
     config.pselrxd = MICROPY_HW_UART1_RX;
 
-#if MICROPY_HW_UART1_HWFC
+    #if MICROPY_HW_UART1_HWFC
     config.pselrts = MICROPY_HW_UART1_RTS;
     config.pselcts = MICROPY_HW_UART1_CTS;
-#endif
+    #endif
     self->timeout = args[ARG_timeout].u_int;
     self->timeout_char = args[ARG_timeout_char].u_int;
 
@@ -259,9 +258,9 @@ static mp_obj_t mp_machine_uart_make_new(const mp_obj_type_t *type, size_t n_arg
     nrfx_uart_init(self->p_uart, &config, uart_event_handler);
     nrfx_uart_rx(self->p_uart, &self->buf.rx_buf[0], 1);
 
-#if NRFX_UART_ENABLED
+    #if NRFX_UART_ENABLED
     nrfx_uart_rx_enable(self->p_uart);
-#endif
+    #endif
 
     return MP_OBJ_FROM_PTR(self);
 }
@@ -319,10 +318,30 @@ static mp_uint_t mp_machine_uart_read(mp_obj_t self_in, void *buf_in, mp_uint_t 
     return size;
 }
 
-static mp_uint_t mp_machine_uart_write(mp_obj_t self_in, const void *buf_in, mp_uint_t size, int *errcode) {
-    machine_uart_obj_t *self = self_in;
+static mp_uint_t mp_machine_uart_write(mp_obj_t self_in, const void *buf, mp_uint_t size, int *errcode) {
+    #if !NRFX_UART_ENABLED
+    if (!nrfx_is_in_ram(buf)) {
+        // Peripherals using EasyDMA require that transfer buffers are placed in DataRAM,
+        // they cannot access data directly from flash.
+        // If buf is in flash, copy to ram in chunks to send.
+        char rambuf[64];
+        char *flashbuf = (char *)buf;
+        mp_uint_t remaining = size;
+        while (remaining) {
+            mp_uint_t chunk = MIN(sizeof(rambuf), remaining);
+            memcpy(rambuf, flashbuf, chunk);
+            if (mp_machine_uart_write(self_in, rambuf, chunk, errcode) == MP_STREAM_ERROR) {
+                return MP_STREAM_ERROR;
+            }
+            remaining -= chunk;
+            flashbuf += chunk;
+        }
+        return size;
+    }
+    #endif
 
-    nrfx_err_t err = nrfx_uart_tx(self->p_uart, buf_in, size);
+    machine_uart_obj_t *self = self_in;
+    nrfx_err_t err = nrfx_uart_tx(self->p_uart, buf, size);
     if (err == NRFX_SUCCESS) {
         while (nrfx_uart_tx_in_progress(self->p_uart)) {
             MICROPY_EVENT_POLL_HOOK;
