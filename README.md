@@ -22,6 +22,8 @@ esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
 ```bash
 esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 ESP32_GENERIC-20240602-v1.23.0.bin
 ```
+<img src="https://github.com/universalbit-dev/esptool/blob/master/images/MicroPython-v1.23.0.png" width=auto></img>
+
 
 The MicroPython project
 =======================
