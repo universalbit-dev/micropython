@@ -3,6 +3,26 @@
 ##### [MicroPython Firmware (ESP32 GENERIC)](https://micropython.org/download/ESP32_GENERIC/)
 [![Unix CI badge](https://github.com/micropython/micropython/actions/workflows/ports_unix.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![STM32 CI badge](https://github.com/micropython/micropython/actions/workflows/ports_stm32.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Docs CI badge](https://github.com/micropython/micropython/actions/workflows/docs.yml/badge.svg)](https://docs.micropython.org/) [![codecov](https://codecov.io/gh/micropython/micropython/branch/master/graph/badge.svg?token=I92PfD05sD)](https://codecov.io/gh/micropython/micropython)
 
+Micropython ESP32 GENERIC FIRMWARE INCLUDED in esptool repository
+```bash
+git clone https://github.com/universalbit-dev/esptool.git
+cd esptool
+```
+
+
+
+#### Flashing Firmware Micropython
+##### hardware: ESP32 NodeMCU WiFi CP2102
+[ESP32](https://www.az-delivery.de/products/esp32-developmentboard)
+<img src="https://github.com/universalbit-dev/esptool/blob/master/ESP32_NodeMCU_Module%20.png" width="30%"></img>
+
+```bash
+esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
+```
+```bash
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 ESP32_GENERIC-20240602-v1.23.0.bin
+```
+
 The MicroPython project
 =======================
 <p align="center">
