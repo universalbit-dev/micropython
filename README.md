@@ -1,6 +1,10 @@
-##### [Flashing MicroPython Firmware](https://randomnerdtutorials.com/flashing-micropython-firmware-esptool-py-esp32-esp8266/)
-##### [ESP32 MicroPython Projects](https://randomnerdtutorials.com/projects-esp32-esp8266-micropython/)
-##### [MicroPython Firmware (ESP32 GENERIC)](https://micropython.org/download/ESP32_GENERIC/)
+##### [Support UniversalBit Project](https://github.com/universalbit-dev/universalbit-dev/tree/main/support) -- [Disambiguation](https://en.wikipedia.org/wiki/Wikipedia:Disambiguation) -- [Bash Reference Manual](https://www.gnu.org/software/bash/manual/html_node/index.html) -- [Join Mastodon](https://mastodon.social/invite/wTHp2hSD) -- [Website](https://www.universalbit.it/) -- [Content Delivery Network](https://universalbitcdn.it/)
+
+* [Flashing MicroPython Firmware](https://randomnerdtutorials.com/flashing-micropython-firmware-esptool-py-esp32-esp8266/)
+* [ESP32 MicroPython Projects](https://randomnerdtutorials.com/projects-esp32-esp8266-micropython/)
+* [MicroPython Firmware (ESP32 GENERIC)](https://micropython.org/download/ESP32_GENERIC/)
+* [MicroPython Project](https://micropython.org/)
+  
 [![Unix CI badge](https://github.com/micropython/micropython/actions/workflows/ports_unix.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![STM32 CI badge](https://github.com/micropython/micropython/actions/workflows/ports_stm32.yml/badge.svg)](https://github.com/micropython/micropython/actions?query=branch%3Amaster+event%3Apush) [![Docs CI badge](https://github.com/micropython/micropython/actions/workflows/docs.yml/badge.svg)](https://docs.micropython.org/) [![codecov](https://codecov.io/gh/micropython/micropython/branch/master/graph/badge.svg?token=I92PfD05sD)](https://codecov.io/gh/micropython/micropython)
 
 Micropython ESP32 GENERIC FIRMWARE INCLUDED in esptool repository
